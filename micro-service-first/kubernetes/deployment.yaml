@@ -1,0 +1,46 @@
+# Reference: https://cloud.google.com/kubernetes-engine/docs/samples/container-helloapp-deployment?hl=en
+# Used above reference and modify the script to include the appropriate container image and attach persistent volume claim and add script to change permission of the Jay_PV_dir directory.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservices-deployment-app1
+  labels:
+    app: microservice-app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservice-app1
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: microservice-app1
+        tier: web
+    spec:
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        securityContext:
+          runAsUser: 0  # Run as root
+        command: ["sh", "-c", "chown -R 1000:1000 /Jay_PV_dir && chmod -R 770 /Jay_PV_dir"]
+        volumeMounts:
+        - mountPath: /Jay_PV_dir
+          name: storage-disk-volume
+      containers:
+      - name: microservice-app1
+        image: us-central1-docker.pkg.dev/kubernetes-cicd-pipeline/kubernetes-container-images/micro-service-app1:latest
+        securityContext:
+          runAsUser: 1000  # Run as non-root user
+        ports:
+        - containerPort: 6000
+        volumeMounts:
+        - mountPath: /Jay_PV_dir
+          name: storage-disk-volume
+      volumes:
+      - name: storage-disk-volume
+        persistentVolumeClaim:
+          claimName: app-volume-pvc

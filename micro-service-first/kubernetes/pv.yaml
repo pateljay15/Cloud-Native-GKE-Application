@@ -1,0 +1,32 @@
+# Reference: https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes
+# Used above reference and modify the script to change the disk size and disk name (pdName) which I have provision on GCP and create persistent volume and claim.
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: app-volume-pv
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  gcePersistentDisk:
+    pdName: kubernetes-storage-disk
+    fsType: ext4
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-volume-pvc
+spec:
+  volumeName: app-volume-pv
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 20Gi
+  selector:
+    matchLabels:
+      name: app-volume-pv

@@ -1,0 +1,17 @@
+# Reference: https://cloud.google.com/kubernetes-engine/docs/samples/container-helloapp-service?hl=en
+# Used above reference to change app name so that service can be attached to the appropriate pod and change port and type of the service.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservice-app1-service
+  labels:
+    app: microservice-app1
+spec:
+  selector:
+    app: microservice-app1
+    tier: web
+  ports:
+    - port: 80
+      targetPort: 6000
+  type: LoadBalancer
